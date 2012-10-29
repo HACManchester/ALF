@@ -10,6 +10,7 @@
 #include "usb.h"
 #include "timer.h"
 #include "boot.h"
+#include "alfie.h"
 
 volatile int bit_count = 0;
 volatile unsigned char data[7];
@@ -43,8 +44,8 @@ void RFID_Init(void)
     bit_set(PORTC,BIT(5));
 
     // Set C6 to output for front door
-    bit_set(DDRC,BIT(6));
-    bit_clear(PORTC,BIT(6));
+    bit_set(frontdoor->ddr, frontdoor->bit);
+    bit_clear(frontdoor->port, frontdoor->bit);
 
     // Set C7 to output for inner door
     bit_set(DDRC,BIT(7));

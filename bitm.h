@@ -10,3 +10,13 @@
 
 #define delay _delay_ms
 #endif
+
+#ifndef _BIT_STRUCTS_H
+#define _BIT_STRUCTS_H
+struct avr_io {
+	int pin;
+	int port;
+	int ddr;
+	int bit; 
+};
+#endif
