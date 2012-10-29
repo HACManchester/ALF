@@ -15,6 +15,10 @@ volatile int bit_count = 0;
 volatile unsigned char data[7];
 volatile int flg_readcard = 0;
 volatile int last_read;
+volatile int frntdoor_on;
+volatile int innrdoor_on;
+volatile int buzzer_on;
+volatile int light_on;
 
 void RFID_Init(void)
 {
@@ -37,6 +41,14 @@ void RFID_Init(void)
     // Set C5 to output for buzzer
     bit_set(DDRC, BIT(5));
     bit_set(PORTC,BIT(5));
+
+    // Set C6 to output for front door
+    bit_set(DDRC,BIT(6));
+    bit_clear(PORTC,BIT(6));
+
+    // Set C7 to output for inner door
+    bit_set(DDRC,BIT(7));
+    bit_clear(PORTC,BIT(7));
 }
 
 inline void set_data_bit(volatile unsigned char* data, int byte, int bit, int value)
@@ -104,6 +116,26 @@ void RFID_Task(void)
             bit_set(PORTD,BIT(6));
             bit_set(PORTD,BIT(5));
             break;
+	case '1':
+            //open front door
+            bit_set(PORTC,BIT(6));
+            frntdoor_on = jiffies;
+            break;
+	case '2':
+            //open inner door
+            bit_set(PORTC,BIT(7));
+            innrdoor_on = jiffies;
+            break;
+	/*case '3':
+            //buzzer on
+            bit_set(PORTD,BIT(7));
+            buzzer_on = jiffies;
+            break;
+	case '4':
+            //light on
+            bit_set(PORTB,BIT(0));
+            light_on = jiffies;
+            break;*/
         default:
             //Nothing
             break;
@@ -114,6 +146,18 @@ void RFID_Task(void)
     //if it has been 50ms since we last had a rfid bit
     if ((jiffies-last_read) > 50){
         flg_readcard = 1;
+    }
+
+    //if its 5 seconds since we buzzed the front door open
+    if ((frntdoor_on > 0) && (jiffies-frntdoor_on) > 5000){
+         bit_clear(PORTC,BIT(6));
+         frntdoor_on = 0;
+    }
+
+    //if its 5 seconds since we buzzed the inner door open
+    if ((innrdoor_on > 0) && (jiffies-innrdoor_on) > 5000){
+         bit_clear(PORTC,BIT(7));
+         innrdoor_on = 0;
     }
 
     if (bit_count > 0 && (flg_readcard==1 || bit_count >= 56))
