@@ -49,6 +49,14 @@ void RFID_Init(void)
     // Set C7 to output for inner door
     bit_set(DDRC,BIT(7));
     bit_clear(PORTC,BIT(7));
+
+    // Set D7 to output for buzzer
+    bit_set(DDRD,BIT(7));
+    bit_clear(PORTD,BIT(7));
+
+    // Set B0 to output for inner door
+    bit_set(DDRB,BIT(0));
+    bit_clear(PORTB,BIT(0));
 }
 
 inline void set_data_bit(volatile unsigned char* data, int byte, int bit, int value)
@@ -126,16 +134,32 @@ void RFID_Task(void)
             bit_set(PORTC,BIT(7));
             innrdoor_on = jiffies;
             break;
-	/*case '3':
-            //buzzer on
-            bit_set(PORTD,BIT(7));
-            buzzer_on = jiffies;
+	case '3':
+            //toggle buzzer
+            if(bit_get(PORTD,BIT(7))
+            {
+                bit_set(PORTD,BIT(7));
+		buzzer_on = jiffies;
+            }
+            else
+            {
+                bit_clear(PORTD,BIT(7));
+		buzzer_on = 0;
+            }
             break;
 	case '4':
-            //light on
-            bit_set(PORTB,BIT(0));
-            light_on = jiffies;
-            break;*/
+            //toggle light
+            if(bit_get(PORTB,BIT(0))
+            {
+                bit_set(PORTB,BIT(0));
+		light_on = jiffies;
+            }
+            else
+            {
+                bit_clear(PORTB,BIT(0));
+		light_on = 0;
+            }
+            break;
         default:
             //Nothing
             break;
@@ -158,6 +182,18 @@ void RFID_Task(void)
     if ((innrdoor_on > 0) && (jiffies-innrdoor_on) > 5000){
          bit_clear(PORTC,BIT(7));
          innrdoor_on = 0;
+    }
+
+    //if the doorbell has been pressed for > 10 seconds, silence it
+    if ((buzzer_on > 0) && (jiffies-buzzer_on) > 10000){
+         bit_clear(PORTD,BIT(7));
+         buzzer_on = 0;
+    }
+
+    //if the light has been on for > 10 seconds, turn it off
+    if ((light_on > 0) && (jiffies-light_on) > 10000){
+         bit_clear(PORTB,BIT(0));
+         light_on = 0;
     }
 
     if (bit_count > 0 && (flg_readcard==1 || bit_count >= 56))
