@@ -63,8 +63,8 @@ int main(int argc, const char *argv[]) {
 	clock_prescale_set(clock_div_1);
 	MCUSR &= ~(1 << WDRF);
 	wdt_disable();
-    timer_init();
-    RFID_Init();
+	timer_init();
+	RFID_Init();
 	USB_Init();
 	sei();
     while (1)

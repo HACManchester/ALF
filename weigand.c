@@ -10,7 +10,6 @@
 #include "usb.h"
 #include "timer.h"
 #include "boot.h"
-#include "alfie.h"
 
 volatile int bit_count = 0;
 volatile unsigned char data[7];
@@ -44,18 +43,18 @@ void RFID_Init(void)
     bit_set(PORTC,BIT(5));
 
     // Set C6 to output for front door
-    bit_set(frontdoor->ddr, frontdoor->bit);
-    bit_clear(frontdoor->port, frontdoor->bit);
+    bit_set(DDRC,BIT(6));
+    bit_clear(DDRC, BIT(6));
 
     // Set C7 to output for inner door
     bit_set(DDRC,BIT(7));
     bit_clear(PORTC,BIT(7));
 
-    // Set D7 to output for buzzer
+    // Set D7 to output for doorbell buzzer
     bit_set(DDRD,BIT(7));
     bit_clear(PORTD,BIT(7));
 
-    // Set B0 to output for inner door
+    // Set B0 to output for light
     bit_set(DDRB,BIT(0));
     bit_clear(PORTB,BIT(0));
 }
@@ -137,7 +136,7 @@ void RFID_Task(void)
             break;
 	case '3':
             //toggle buzzer
-            if(bit_get(PORTD,BIT(7))
+            if(bit_get(PORTD,BIT(7)))
             {
                 bit_set(PORTD,BIT(7));
 		buzzer_on = jiffies;
@@ -150,7 +149,7 @@ void RFID_Task(void)
             break;
 	case '4':
             //toggle light
-            if(bit_get(PORTB,BIT(0))
+            if(bit_get(PORTB,BIT(0)))
             {
                 bit_set(PORTB,BIT(0));
 		light_on = jiffies;
@@ -174,25 +173,25 @@ void RFID_Task(void)
     }
 
     //if its 5 seconds since we buzzed the front door open
-    if ((frntdoor_on > 0) && (jiffies-frntdoor_on) > 5000){
+    if ((frntdoor_on > 0) && (jiffies-frntdoor_on) > 500){
          bit_clear(PORTC,BIT(6));
          frntdoor_on = 0;
     }
 
     //if its 5 seconds since we buzzed the inner door open
-    if ((innrdoor_on > 0) && (jiffies-innrdoor_on) > 5000){
+    if ((innrdoor_on > 0) && (jiffies-innrdoor_on) > 500){
          bit_clear(PORTC,BIT(7));
          innrdoor_on = 0;
     }
 
     //if the doorbell has been pressed for > 10 seconds, silence it
-    if ((buzzer_on > 0) && (jiffies-buzzer_on) > 10000){
+    if ((buzzer_on > 0) && (jiffies-buzzer_on) > 1000){
          bit_clear(PORTD,BIT(7));
          buzzer_on = 0;
     }
 
     //if the light has been on for > 10 seconds, turn it off
-    if ((light_on > 0) && (jiffies-light_on) > 10000){
+    if ((light_on > 0) && (jiffies-light_on) > 1000){
          bit_clear(PORTB,BIT(0));
          light_on = 0;
     }
