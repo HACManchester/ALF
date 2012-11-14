@@ -232,31 +232,31 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
     uint16_t    Size    = NO_DESCRIPTOR;
 
     switch (DescriptorType) {
-    case DTYPE_Device:
-        Address = &DeviceDescriptor;
-        Size    = sizeof(USB_Descriptor_Device_t);
-        break;
-    case DTYPE_Configuration:
-        Address = &ConfigurationDescriptor;
-        Size    = sizeof(USB_Descriptor_Configuration_t);
-        break;
-    case DTYPE_String:
-        switch (DescriptorNumber) {
-        case 0x00:
-            Address = &LanguageString;
-            Size    = pgm_read_byte(&LanguageString.Header.Size);
+        case DTYPE_Device:
+            Address = &DeviceDescriptor;
+            Size    = sizeof(USB_Descriptor_Device_t);
             break;
-        case 0x01:
-            Address = &ManufacturerString;
-            Size    = pgm_read_byte(&ManufacturerString.Header.Size);
+        case DTYPE_Configuration:
+            Address = &ConfigurationDescriptor;
+            Size    = sizeof(USB_Descriptor_Configuration_t);
             break;
-        case 0x02:
-            Address = &ProductString;
-            Size    = pgm_read_byte(&ProductString.Header.Size);
-            break;
-        }
+        case DTYPE_String:
+            switch (DescriptorNumber) {
+                case 0x00:
+                    Address = &LanguageString;
+                    Size    = pgm_read_byte(&LanguageString.Header.Size);
+                    break;
+                case 0x01:
+                    Address = &ManufacturerString;
+                    Size    = pgm_read_byte(&ManufacturerString.Header.Size);
+                    break;
+                case 0x02:
+                    Address = &ProductString;
+                    Size    = pgm_read_byte(&ProductString.Header.Size);
+                    break;
+            }
 
-        break;
+            break;
     }
 
     *DescriptorAddress = Address;
