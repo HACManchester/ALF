@@ -168,7 +168,7 @@ void RFID_Task(void)
     cli();
 
     //if it has been 50ms since we last had a rfid bit
-    if ((jiffies-last_read) > 50){
+    if ((bit_count > 0) && (jiffies-last_read) > 200){
         flg_readcard = 1;
     }
 
@@ -205,6 +205,10 @@ void RFID_Task(void)
         CDC_Device_Flush(&VirtualSerial_CDC_Interface);
         bit_count = 0;
         flg_readcard = 0;
+        for (int i=0; i<7;i++)
+        {
+            data[i]=0;
+        }
     }
     sei();
 }
