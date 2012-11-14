@@ -65,14 +65,42 @@ int main(int argc, const char *argv[])
     MCUSR &= ~(1 << WDRF);
     wdt_disable();
     timer_init();
+    Control_Init();
     RFID_Init();
     USB_Init();
     sei();
     while (1) {
         Control_Task();
+        Control_Doorbell();
         RFID_Task();
         USB_USBTask();
     }
+}
+
+void Control_Init()
+{
+
+    // Set C6 to output for front door
+    bit_set(DDRC,BIT(6));
+    bit_clear(DDRC, BIT(6));
+
+    // Set C7 to output for inner door
+    bit_set(DDRC,BIT(7));
+    bit_clear(PORTC,BIT(7));
+
+    // Set D7 to output for doorbell buzzer
+    bit_set(DDRD,BIT(7));
+    bit_clear(PORTD,BIT(7));
+
+    // Set B0 to output for light
+    bit_set(DDRB,BIT(0));
+    bit_clear(PORTB,BIT(0));
+
+    // Set C4 to input for doorbell buzzer, disable pullups
+    bit_clear(DDRC,BIT(4));
+    bit_clear(PORTC,BIT(4));
+
+    return;
 }
 
 void Control_Task()
@@ -168,6 +196,21 @@ void Control_Task()
     }
 
     return;
+}
+
+void Control_Doorbell(void)
+{
+    // only check the doorbell every 500 ms
+    if ((jiffies-doorbell_last_checked) > 50) {
+        doorbell_last_checked = jiffies;
+
+        //doorbell is pressed, send a B every 200ms
+        if(bit_get(PINC,BIT(4)) != 0) {
+            char buf[3] = "B\r\n";
+            CDC_Device_SendString(&VirtualSerial_CDC_Interface,buf);
+            CDC_Device_Flush(&VirtualSerial_CDC_Interface);
+        }
+    }
 }
 
 
