@@ -37,22 +37,6 @@ void RFID_Init(void)
     // Set C5 to output for buzzer
     bit_set(DDRC, BIT(5));
     bit_set(PORTC,BIT(5));
-
-    // Set C6 to output for front door
-    bit_set(DDRC,BIT(6));
-    bit_clear(DDRC, BIT(6));
-
-    // Set C7 to output for inner door
-    bit_set(DDRC,BIT(7));
-    bit_clear(PORTC,BIT(7));
-
-    // Set D7 to output for doorbell buzzer
-    bit_set(DDRD,BIT(7));
-    bit_clear(PORTD,BIT(7));
-
-    // Set B0 to output for light
-    bit_set(DDRB,BIT(0));
-    bit_clear(PORTB,BIT(0));
 }
 
 inline void set_data_bit(volatile unsigned char* data, int byte, int bit, int value)
