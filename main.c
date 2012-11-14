@@ -32,46 +32,45 @@
  *  passed to all CDC Class driver functions, so that multiple instances of the same class
  *  within a device can be differentiated from one another.
  */
-USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
-	{
-		.Config =
-			{
-				.ControlInterfaceNumber   = 0,
-				.DataINEndpoint           =
-					{
-						.Address          = CDC_TX_EPADDR,
-						.Size             = CDC_TXRX_EPSIZE,
-						.Banks            = 1,
-					},
-				.DataOUTEndpoint =
-					{
-						.Address          = CDC_RX_EPADDR,
-						.Size             = CDC_TXRX_EPSIZE,
-						.Banks            = 1,
-					},
-				.NotificationEndpoint =
-					{
-						.Address          = CDC_NOTIFICATION_EPADDR,
-						.Size             = CDC_NOTIFICATION_EPSIZE,
-						.Banks            = 1,
-					},
-			},
-	};
-
-
-int main(int argc, const char *argv[]) {
-	clock_prescale_set(clock_div_1);
-	MCUSR &= ~(1 << WDRF);
-	wdt_disable();
-	timer_init();
-	RFID_Init();
-	USB_Init();
-	sei();
-    while (1)
+USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface = {
+    .Config =
     {
+        .ControlInterfaceNumber   = 0,
+        .DataINEndpoint           =
+        {
+            .Address          = CDC_TX_EPADDR,
+            .Size             = CDC_TXRX_EPSIZE,
+            .Banks            = 1,
+        },
+        .DataOUTEndpoint =
+        {
+            .Address          = CDC_RX_EPADDR,
+            .Size             = CDC_TXRX_EPSIZE,
+            .Banks            = 1,
+        },
+        .NotificationEndpoint =
+        {
+            .Address          = CDC_NOTIFICATION_EPADDR,
+            .Size             = CDC_NOTIFICATION_EPSIZE,
+            .Banks            = 1,
+        },
+    },
+};
+
+
+int main(int argc, const char *argv[])
+{
+    clock_prescale_set(clock_div_1);
+    MCUSR &= ~(1 << WDRF);
+    wdt_disable();
+    timer_init();
+    RFID_Init();
+    USB_Init();
+    sei();
+    while (1) {
         RFID_Task();
-		USB_USBTask();
-	}
+        USB_USBTask();
+    }
 }
 
 
@@ -88,21 +87,21 @@ void EVENT_USB_Device_Disconnect(void)
 /** Event handler for the library USB Configuration Changed event. */
 void EVENT_USB_Device_ConfigurationChanged(void)
 {
-	bool success = true;
+    bool success = true;
 
-	success &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
+    success &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
 }
 
 /** Event handler for the library USB Control Request reception event. */
 void EVENT_USB_Device_ControlRequest(void)
 {
-	CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
+    CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
 }
 
 // DATA 0 Int
 ISR(INT0_vect)
 {
-	data0_int();
+    data0_int();
 }
 
 // DATA 1 Int
