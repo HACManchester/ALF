@@ -29,6 +29,8 @@
 #include "boot.h"
 #include "rfid.h"
 
+char bell_buf[3] = "B\r\n";
+
 /** LUFA CDC Class driver interface configuration and state information. This structure is
  *  passed to all CDC Class driver functions, so that multiple instances of the same class
  *  within a device can be differentiated from one another.
@@ -100,6 +102,8 @@ void Control_Init()
     bit_clear(DDRC,BIT(4));
     bit_clear(PORTC,BIT(4));
 
+
+
     return;
 }
 
@@ -137,20 +141,20 @@ void Control_Task()
             bit_set(PORTD,BIT(5));
             break;
         case '1':
-            //open front door
+/*            //open front door
             bit_set(PORTC,BIT(6));
-            frntdoor_on = jiffies;
-            break;
+            frntdoor_on = jiffies + 500;
+            break;*/
         case '2':
             //open inner door
             bit_set(PORTC,BIT(7));
-            innrdoor_on = jiffies;
+            innrdoor_on = jiffies + 500;
             break;
         case '3':
             //toggle buzzer
             if(bit_get(PORTD,BIT(7))) {
                 bit_set(PORTD,BIT(7));
-                buzzer_on = jiffies;
+                buzzer_on = jiffies + 1000;
             } else {
                 bit_clear(PORTD,BIT(7));
                 buzzer_on = 0;
@@ -160,7 +164,7 @@ void Control_Task()
             //toggle light
             if(bit_get(PORTB,BIT(0))) {
                 bit_set(PORTB,BIT(0));
-                light_on = jiffies;
+                light_on = jiffies + 1000;
             } else {
                 bit_clear(PORTB,BIT(0));
                 light_on = 0;
@@ -172,25 +176,25 @@ void Control_Task()
     }
 
     //if its 5 seconds since we buzzed the front door open
-    if ((frntdoor_on > 0) && (jiffies-frntdoor_on) > 500) {
+    if (frntdoor_on < jiffies) {
         bit_clear(PORTC,BIT(6));
         frntdoor_on = 0;
     }
 
     //if its 5 seconds since we buzzed the inner door open
-    if ((innrdoor_on > 0) && (jiffies-innrdoor_on) > 500) {
+    if (innrdoor_on < jiffies) {
         bit_clear(PORTC,BIT(7));
         innrdoor_on = 0;
     }
 
     //if the doorbell has been pressed for > 10 seconds, silence it
-    if ((buzzer_on > 0) && (jiffies-buzzer_on) > 1000) {
+    if ((jiffies-buzzer_on) > 1000) {
         bit_clear(PORTD,BIT(7));
         buzzer_on = 0;
     }
 
     //if the light has been on for > 10 seconds, turn it off
-    if ((light_on > 0) && (jiffies-light_on) > 1000) {
+    if ((jiffies-light_on) > 1000) {
         bit_clear(PORTB,BIT(0));
         light_on = 0;
     }
@@ -200,14 +204,13 @@ void Control_Task()
 
 void Control_Doorbell(void)
 {
-    // only check the doorbell every 500 ms
-    if ((jiffies-doorbell_last_checked) > 50) {
+    // only check the doorbell every 200 ms
+    if ((jiffies-doorbell_last_checked) > 20) {
         doorbell_last_checked = jiffies;
 
         //doorbell is pressed, send a B every 200ms
         if(bit_get(PINC,BIT(4)) != 0) {
-            char buf[3] = "B\r\n";
-            CDC_Device_SendString(&VirtualSerial_CDC_Interface,buf);
+            CDC_Device_SendString(&VirtualSerial_CDC_Interface,bell_buf);
             CDC_Device_Flush(&VirtualSerial_CDC_Interface);
         }
     }
