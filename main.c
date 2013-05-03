@@ -73,7 +73,6 @@ int main(int argc, const char *argv[])
     sei();
     while (1) {
         Control_Task();
-        Control_Doorbell();
         RFID_Task();
         USB_USBTask();
     }
@@ -82,27 +81,9 @@ int main(int argc, const char *argv[])
 void Control_Init()
 {
 
-    // Set C6 to output for front door
-    bit_set(DDRC,BIT(6));
-    bit_clear(DDRC, BIT(6));
-
-    // Set C7 to output for inner door
-    bit_set(DDRC,BIT(7));
-    bit_clear(PORTC,BIT(7));
-
-    // Set D7 to output for doorbell buzzer
-    bit_set(DDRD,BIT(7));
-    bit_clear(PORTD,BIT(7));
-
-    // Set B0 to output for light
-    bit_set(DDRB,BIT(0));
-    bit_clear(PORTB,BIT(0));
-
-    // Set C4 to input for doorbell buzzer, disable pullups
-    bit_clear(DDRC,BIT(4));
-    bit_clear(PORTC,BIT(4));
-
-
+    // Set C6 to output for door and set high
+    bit_set(DDRC,BIT(0));
+    bit_set(DDRC, BIT(0));
 
     return;
 }
@@ -124,51 +105,10 @@ void Control_Task()
             _delay_ms(500);
             bit_set(PORTD,BIT(5));
             break;
-        case 'r':
-        case 'R':
-            //toggle red led briefly (active low)
-            bit_clear(PORTD,BIT(6));
-            _delay_ms(500);
-            bit_set(PORTD,BIT(6));
-            break;
-        case 'o':
-        case 'O':
-            //toggle both leds briefly for orange
-            bit_clear(PORTD,BIT(6));
-            bit_clear(PORTD,BIT(5));
-            _delay_ms(500);
-            bit_set(PORTD,BIT(6));
-            bit_set(PORTD,BIT(5));
-            break;
         case '1':
-/*            //open front door
-            bit_set(PORTC,BIT(6));
+            //open front door
+            bit_clear(PORTB,BIT(0));
             frntdoor_on = jiffies + 500;
-            break;*/
-        case '2':
-            //open inner door
-            bit_set(PORTC,BIT(7));
-            innrdoor_on = jiffies + 500;
-            break;
-        case '3':
-            //toggle buzzer
-            if(bit_get(PORTD,BIT(7))) {
-                bit_set(PORTD,BIT(7));
-                buzzer_on = jiffies + 1000;
-            } else {
-                bit_clear(PORTD,BIT(7));
-                buzzer_on = 0;
-            }
-            break;
-        case '4':
-            //toggle light
-            if(bit_get(PORTB,BIT(0))) {
-                bit_set(PORTB,BIT(0));
-                light_on = jiffies + 1000;
-            } else {
-                bit_clear(PORTB,BIT(0));
-                light_on = 0;
-            }
             break;
         default:
             //Nothing
@@ -177,45 +117,13 @@ void Control_Task()
 
     //if its 5 seconds since we buzzed the front door open
     if (frntdoor_on < jiffies) {
-        bit_clear(PORTC,BIT(6));
+        bit_set(PORTB,BIT(0));
         frntdoor_on = 0;
     }
 
-    //if its 5 seconds since we buzzed the inner door open
-    if (innrdoor_on < jiffies) {
-        bit_clear(PORTC,BIT(7));
-        innrdoor_on = 0;
-    }
-
-    //if the doorbell has been pressed for > 10 seconds, silence it
-    if ((jiffies-buzzer_on) > 1000) {
-        bit_clear(PORTD,BIT(7));
-        buzzer_on = 0;
-    }
-
-    //if the light has been on for > 10 seconds, turn it off
-    if ((jiffies-light_on) > 1000) {
-        bit_clear(PORTB,BIT(0));
-        light_on = 0;
-    }
 
     return;
 }
-
-void Control_Doorbell(void)
-{
-    // only check the doorbell every 200 ms
-    if ((jiffies-doorbell_last_checked) > 20) {
-        doorbell_last_checked = jiffies;
-
-        //doorbell is pressed, send a B every 200ms
-        if(bit_get(PINC,BIT(4)) != 0) {
-            CDC_Device_SendString(&VirtualSerial_CDC_Interface,bell_buf);
-            CDC_Device_Flush(&VirtualSerial_CDC_Interface);
-        }
-    }
-}
-
 
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void)
@@ -253,6 +161,9 @@ ISR(INT1_vect)
     data1_int();
 }
 
-
+ISR(INT2_vect)
+{
+    doorbell();
+}
 
 
