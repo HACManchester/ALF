@@ -74,7 +74,7 @@ void RFID_Task(void)
 {
     cli();
     //if it has been 200us since we last had a rfid bit, the card has a short ID number
-    if ((bit_count > 0) && (jiffies-last_read) > 200) {
+    if ((jiffies-last_read) > 200) {
         flg_readcard = 1;
     }
 
@@ -84,7 +84,7 @@ void RFID_Task(void)
         //Write code
         if (bit_count > 1)
         {   
-            snprintf(buf,12,"%.2x%.2x%.2x%.2xs\r\n", data[0], data[1], data[2], data[3]);
+            snprintf(buf,12,"%.2x%.2x%.2x%.2xs\r\n", data[3], data[2], data[1], data[0]);
             CDC_Device_SendString(&VirtualSerial_CDC_Interface,buf);
             CDC_Device_Flush(&VirtualSerial_CDC_Interface);
         }
