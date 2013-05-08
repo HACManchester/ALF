@@ -12,7 +12,7 @@
 #include "boot.h"
 
 volatile int bit_count = 0;
-volatile unsigned char data[7];
+volatile unsigned char data[4];
 volatile int flg_readcard = 0;
 volatile int last_read;
 
@@ -59,7 +59,7 @@ void data0_int(void)
     last_read = jiffies;
     set_data_bit_sc(data,bit_count,0);
     bit_count++;
-    _delay_us(100); // Delay to remove bounce
+    _delay_us(400); // Delay to remove bounce
 }
 
 void data1_int(void)
@@ -67,7 +67,7 @@ void data1_int(void)
     last_read = jiffies;
     set_data_bit_sc(data,bit_count,1);
     bit_count++;
-    _delay_us(100); // Delay to remove bounce
+    _delay_us(400); // Delay to remove bounce
 }
 
 void RFID_Task(void)
@@ -79,15 +79,18 @@ void RFID_Task(void)
     }
 
     //if we have finished reading the card id (it has stopped sending data or we have received 56 bits)
-    if (bit_count > 0 && (flg_readcard==1 || bit_count >= 56)) {
-        char buf[17];
+    if (bit_count > 0 && (flg_readcard==1 || bit_count >= 32)) {
+        char buf[12];
         //Write code
-        snprintf(buf,17,"%.2x%.2x%.2x%.2x%.2x%.2x%.2x\r\n", data[0], data[1], data[2], data[3], data[4], data[5], data[6]);
-        CDC_Device_SendString(&VirtualSerial_CDC_Interface,buf);
-        CDC_Device_Flush(&VirtualSerial_CDC_Interface);
+        if (bit_count > 1)
+        {   
+            snprintf(buf,12,"%.2x%.2x%.2x%.2xs\r\n", data[0], data[1], data[2], data[3]);
+            CDC_Device_SendString(&VirtualSerial_CDC_Interface,buf);
+            CDC_Device_Flush(&VirtualSerial_CDC_Interface);
+        }
         bit_count = 0;
         flg_readcard = 0;
-        for (int i=0; i<7; i++) {
+        for (int i=0; i<4; i++) {
             data[i]=0;
         }
     }
