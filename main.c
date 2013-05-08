@@ -84,7 +84,7 @@ void Control_Init()
 
     // Set C6 to output for front door
     bit_set(DDRC,BIT(6));
-    bit_clear(DDRC, BIT(6));
+    bit_clear(PORTC, BIT(6));
 
     // Set C7 to output for inner door
     bit_set(DDRC,BIT(7));
