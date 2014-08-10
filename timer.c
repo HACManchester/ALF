@@ -3,11 +3,7 @@
 #include <avr/power.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
-#include <LUFA/Version.h>
-#include <LUFA/Drivers/Misc/RingBuffer.h>
-#include <LUFA/Drivers/USB/USB.h>
 #include "bitm.h"
-#include "usb.h"
 #include "timer.h"
 void timer_init()
 {

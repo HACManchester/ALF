@@ -5,3 +5,5 @@ void data0_int(void);
 void data1_int(void);
 void RFID_Task(void);
 #endif
+
+#define READER_BITS 34
