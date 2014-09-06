@@ -25,6 +25,7 @@
 #include "timer.h"
 #include "rfid.h"
 #include "uart.h"
+#include "digitalinputs.h"
 
 int main(int argc, const char *argv[])
 {
@@ -45,11 +46,15 @@ int main(int argc, const char *argv[])
     RFID_Init();
     puts("#RFID Initialised");
 
+    Digital_Input_Init();
+    puts("#Digital Inputs Initialised");
+
     sei();
     while (1) {
         Control_Task();
         Control_Doorbell();
         RFID_Task();
+        Digital_Input_Task();
     }
 }
 
