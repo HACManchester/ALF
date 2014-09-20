@@ -22,29 +22,31 @@ void Analog_Input_Task(void)
 {
 	uint16_t tmp;
 
-	if (analog_next_check < jiffies)
+	if ((analog_next_check < jiffies))
 	{
-		if (analog_current_channel == ANALOG_0_ADC)
+		if (analog_next_check > 100)
 		{
-			tmp = Analog_Read(ANALOG_1_ADC);
-			if (tmp != analog_1_last_value)
+			if (analog_current_channel == ANALOG_0_ADC)
 			{
-				printf("A1-%04d\n", Analog_Read(ANALOG_1_ADC));
-				analog_1_last_value = tmp;
+				tmp = Analog_Read(ANALOG_1_ADC);
+				if (tmp != analog_1_last_value)
+				{
+					printf("A1-%04d\n", Analog_Read(ANALOG_1_ADC));
+					analog_1_last_value = tmp;
+				}
 			}
-		}
-		else
-		{
-			tmp = Analog_Read(ANALOG_0_ADC);
-			if (tmp != analog_0_last_value)
+			else
 			{
-				printf("A0-%04d\n", Analog_Read(ANALOG_0_ADC));
-				analog_0_last_value = tmp;
+				tmp = Analog_Read(ANALOG_0_ADC);
+				if (tmp != analog_0_last_value)
+				{
+					printf("A0-%04d\n", Analog_Read(ANALOG_0_ADC));
+					analog_0_last_value = tmp;
+				}
 			}
 		}
 
 		Analog_Read(analog_current_channel);
-
 		analog_next_check = jiffies + 100;
 	}
 }
