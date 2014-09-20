@@ -1,7 +1,12 @@
 *.o
 *.lst
 *.d
-minimus-weigend.*
-.dep
+*.eep
+*.elf
+*.hex
+*.lss
+*.map
+*.sym
+*.dep
 *~
 *.orig
