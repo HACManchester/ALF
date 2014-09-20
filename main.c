@@ -34,15 +34,15 @@ int main(int argc, const char *argv[])
     MCUSR &= ~(1 << WDRF);
     wdt_disable();
 
-    uart_init();
-    stdout = &uart_output;
-    stdin  = &uart_input;
-
     timer_init();
     puts("#Timers Initalised");
 
     Control_Init();
     puts("#Control Initialised");
+
+    uart_init();
+    stdout = &uart_output;
+    stdin  = &uart_input;
 
     RFID_Init();
     puts("#RFID Initialised");
@@ -65,19 +65,15 @@ int main(int argc, const char *argv[])
 
 void Control_Init()
 {
-
     // Set C6 to output for front door
     bit_set(DDRC,BIT(3));
     bit_clear(PORTC, BIT(3));
-
-    // Set D7 to output for buzzer
-    bit_set(DDRC,BIT(5));
-    bit_set(PORTC,BIT(5));
 
     // Set C4 to input for doorbell, disable pullups
     bit_clear(DDRC,BIT(4));
     bit_clear(PORTC,BIT(4));
 
+    output_enabled = 0;
     return;
 }
 
@@ -112,17 +108,27 @@ void Control_Task()
 		    bit_set(PORTD,BIT(6));
 		    bit_set(PORTD,BIT(5));
 		    break;
+		case 'E':
+                    puts("#Door enabled");
+                    output_enabled = 1;
+		    break;
+		case 'e':
+                    puts("#Door disabled");
+                    output_enabled = 0;
+		    break;
 		case '1':
 		    //open front door
-                    puts("#Opening Door");
-		    bit_set(PORTC,BIT(3));
-		    door_on = jiffies + 500;
-		    break;
-		case '3':
-		    //toggle buzzer
-                    puts("#BZZZZ");
-                    bit_clear(PORTC,BIT(5));
-		    buzzer_on = jiffies + 50;
+		    if (output_enabled)
+                    {
+                        puts("#Opening Door");
+                        bit_set(PORTC,BIT(3));
+		        door_on = jiffies + DOOR_ON_TIME;
+                    }
+                    else
+                    {
+                        puts("#Door is disabled, Enable the door output with E before opening it.");
+                    }
+
 		    break;
 		default:
 		    //Nothing
@@ -134,12 +140,6 @@ void Control_Task()
     if (door_on < jiffies) {
         bit_clear(PORTC,BIT(3));
         door_on = 0;
-    }
-
-    //if the doorbell has been pressed for > 10 seconds, silence it
-    if (buzzer_on < jiffies) {
-        bit_set(PORTC,BIT(5));
-        buzzer_on = 0;
     }
 
     return;
