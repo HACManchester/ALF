@@ -31,7 +31,8 @@ void Analog_Input_Task(void)
 				tmp = Analog_Read(ANALOG_1_ADC);
 				if (tmp != analog_1_last_value)
 				{
-					printf("A1-%04d\n", Analog_Read(ANALOG_1_ADC));
+					if ((tmp > 10) && (tmp < 1014))
+						printf("A1-%04d\n", tmp);
 					analog_1_last_value = tmp;
 				}
 			}
@@ -40,7 +41,8 @@ void Analog_Input_Task(void)
 				tmp = Analog_Read(ANALOG_0_ADC);
 				if (tmp != analog_0_last_value)
 				{
-					printf("A0-%04d\n", Analog_Read(ANALOG_0_ADC));
+                                        if ((tmp > 10) && (tmp < 1014))
+						printf("A0-%04d\n", tmp);
 					analog_0_last_value = tmp;
 				}
 			}
