@@ -50,7 +50,7 @@ void Digital_Input_Task(void)
 
         if (digital_last_announce+1000 < jiffies)
         {
-		if (jiffies > 1000)
+		if ((jiffies+1000) > 1000)
 		{
                 	if (digital_0_state == 0)
                 	        puts("D0-0");
