@@ -8,8 +8,8 @@
 #define DIGITAL_1_DDR DDRB
 #define DIGITAL_1_BIT _BV(1)
 
-uint16_t digital_next_check;
-uint16_t digital_next_announce;
+uint16_t digital_last_check;
+uint16_t digital_last_announce;
 uint8_t digital_0_state;
 uint8_t digital_1_state;
 uint8_t digital_tmp;

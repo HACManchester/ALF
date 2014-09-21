@@ -7,7 +7,7 @@
 
 void Digital_Input_Init(void)
 {
-	digital_next_check = 0;
+	digital_last_check = 0;
 
 	bit_clear(DIGITAL_0_DDR, DIGITAL_0_BIT);
 	bit_set(DIGITAL_0_PORT, DIGITAL_0_BIT);
@@ -21,7 +21,7 @@ void Digital_Input_Init(void)
 
 void Digital_Input_Task(void)
 {
-	if (digital_next_check < jiffies)
+	if (digital_last_check+10 < jiffies)
 	{
 		digital_tmp = bit_is_set(DIGITAL_0_PIN, DIGITAL_0_BIT);
 		if (digital_tmp !=  digital_0_state)
@@ -45,23 +45,24 @@ void Digital_Input_Task(void)
 			digital_1_state = digital_tmp;
 		}
 
-		digital_next_check = jiffies + 5;
-
-		if (digital_next_check > (0-10)) digital_next_check = 0;
-
-		if (digital_next_announce < jiffies)
-		{
-			if (digital_0_state == 0)
-				puts("D0-0");
-			else
-				puts("D0-1");
-
-			if (digital_1_state == 0)
-				puts("D1-0");
-			else
-				puts("D1-1");
-			
-			digital_next_announce = jiffies + 3000;
-		}
+		digital_last_check = jiffies;
 	}
+
+        if (digital_last_announce+1000 < jiffies)
+        {
+		if (jiffies > 1000)
+		{
+                	if (digital_0_state == 0)
+                	        puts("D0-0");
+                	else
+                	        puts("D0-1");
+                	if (digital_1_state == 0)
+                	        puts("D1-0");
+                	else
+                	        puts("D1-1");
+
+                	printf(";jiffies=%u, digital_last_check=%u, digital_last_announce=%u\n", jiffies, digital_last_check, digital_last_announce);
+		}
+                digital_last_announce = jiffies;
+        }
 }
