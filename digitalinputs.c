@@ -47,6 +47,8 @@ void Digital_Input_Task(void)
 
 		digital_next_check = jiffies + 5;
 
+		if (digital_next_check > (0-10)) digital_next_check = 0;
+
 		if (digital_next_announce < jiffies)
 		{
 			if (digital_0_state == 0)
