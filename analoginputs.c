@@ -24,16 +24,19 @@ void Analog_Input_Task(void)
 
 	if ((analog_next_check < jiffies))
 	{
-		if (analog_next_check > 100)
+		if (analog_next_check > 20)
 		{
 			if (analog_current_channel == ANALOG_0_ADC)
 			{
 				tmp = Analog_Read(ANALOG_1_ADC);
 				if (tmp != analog_1_last_value)
 				{
-					if ((tmp > 10) && (tmp < 1014))
+					// dont fart around and keep repeating when we have a high or low value
+					if (!((tmp > 900 && analog_1_last_value > 900) || (tmp < 100 && analog_1_last_value < 100)))
+					{
 						printf("A1-%04d\n", tmp);
-					analog_1_last_value = tmp;
+						analog_1_last_value = tmp;
+					}
 				}
 			}
 			else
@@ -41,15 +44,17 @@ void Analog_Input_Task(void)
 				tmp = Analog_Read(ANALOG_0_ADC);
 				if (tmp != analog_0_last_value)
 				{
-                                        if ((tmp > 10) && (tmp < 1014))
+                                        if (!((tmp > 900 && analog_0_last_value > 900) || (tmp < 100 && analog_0_last_value < 100)))
+					{
 						printf("A0-%04d\n", tmp);
-					analog_0_last_value = tmp;
+						analog_0_last_value = tmp;
+					}
 				}
 			}
 		}
 
 		Analog_Read(analog_current_channel);
-		analog_next_check = jiffies + 100;
+		analog_next_check = jiffies + 20;
 	}
 }
 

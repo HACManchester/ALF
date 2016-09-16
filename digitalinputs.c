@@ -21,7 +21,7 @@ void Digital_Input_Init(void)
 
 void Digital_Input_Task(void)
 {
-	if (digital_last_check+10 < jiffies)
+	if ((digital_last_check+10 <= jiffies) || (digital_last_check+10 >= 65533))
 	{
 		digital_tmp = bit_is_set(DIGITAL_0_PIN, DIGITAL_0_BIT);
 		if (digital_tmp !=  digital_0_state)
@@ -48,7 +48,8 @@ void Digital_Input_Task(void)
 		digital_last_check = jiffies;
 	}
 
-        if (digital_last_announce+1000 < jiffies)
+/*
+        if ((digital_last_announce+10000 <= jiffies) || (digital_last_announce+10000 >= 65533))
         {
 		if ((jiffies+1000) > 1000)
 		{
@@ -60,9 +61,8 @@ void Digital_Input_Task(void)
                 	        puts("D1-0");
                 	else
                 	        puts("D1-1");
-
-                	printf(";jiffies=%u, digital_last_check=%u, digital_last_announce=%u\n", jiffies, digital_last_check, digital_last_announce);
 		}
                 digital_last_announce = jiffies;
         }
+*/
 }
