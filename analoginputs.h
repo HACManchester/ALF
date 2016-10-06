@@ -1,7 +1,7 @@
 #define ANALOG_0_ADC 6
 #define ANALOG_1_ADC 7
 
-uint16_t analog_next_check;
+uint16_t analog_last_check;
 uint16_t analog_value;
 
 uint16_t analog_0_last_value;
